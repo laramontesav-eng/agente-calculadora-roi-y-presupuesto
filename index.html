@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NetLead ROI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #F7F5FB;
+    --surface: #FFFFFF;
+    --surface-2: #F1ECFA;
+    --border: #E1D9F2;
+    --text: #1C1230;
+    --text-2: #5B4E78;
+    --muted: #8B7FA3;
+    --brand-purple: #7C3AED;
+    --brand-magenta: #B8115F;
+    --good: #0CA30C;
+    --bad: #D03B3B;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0A0614;
+      --surface: #130A24;
+      --surface-2: #1B1030;
+      --border: #2E1E4A;
+      --text: #F3EEFB;
+      --text-2: #C7BEE0;
+      --muted: #9B8DBE;
+      --brand-purple: #8B5CF6;
+      --brand-magenta: #EC1279;
+      --good: #0CA30C;
+      --bad: #D03B3B;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0A0614;
+    --surface: #130A24;
+    --surface-2: #1B1030;
+    --border: #2E1E4A;
+    --text: #F3EEFB;
+    --text-2: #C7BEE0;
+    --muted: #9B8DBE;
+    --brand-purple: #8B5CF6;
+    --brand-magenta: #EC1279;
+    --good: #0CA30C;
+    --bad: #D03B3B;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background:
+      radial-gradient(ellipse 900px 500px at 12% -8%, color-mix(in srgb, var(--brand-purple) 16%, transparent), transparent 60%),
+      radial-gradient(ellipse 900px 500px at 88% 6%, color-mix(in srgb, var(--brand-magenta) 12%, transparent), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    padding: 40px 20px 80px;
+    line-height: 1.5;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  a { color: inherit; }
+
+  /* ---------- Header ---------- */
+  header { margin-bottom: 32px; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--brand-magenta);
+    letter-spacing: .4px;
+    margin-bottom: 10px;
+  }
+  .eyebrow::before { content: "$ "; color: var(--brand-purple); }
+  h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
+    font-size: clamp(26px, 3.4vw, 38px);
+    letter-spacing: -.5px;
+    text-wrap: balance;
+    margin-bottom: 10px;
+  }
+  h1 span { color: var(--brand-magenta); }
+  .sub { color: var(--text-2); font-size: 15px; max-width: 66ch; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; align-items: center; }
+  .btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color .15s ease, transform .1s ease;
+  }
+  .btn:hover { border-color: var(--brand-purple); }
+  .btn:active { transform: translateY(1px); }
+  .btn:focus-visible { outline: 2px solid var(--brand-purple); outline-offset: 2px; }
+  .btn.primary { background: linear-gradient(135deg, var(--brand-purple), var(--brand-magenta)); border: none; color: #fff; }
+  .save-note { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--muted); }
+
+  /* ---------- Layout ---------- */
+  .grid { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 22px; align-items: start; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; }
+  .stack { display: flex; flex-direction: column; gap: 16px; }
+
+  /* ---------- Form ---------- */
+  fieldset { border: none; padding: 0; margin: 0; }
+  .group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 13.5px; font-weight: 500; color: var(--text-2); margin-bottom: 6px; }
+  .field input[type="number"] {
+    width: 100%;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14.5px;
+    font-variant-numeric: tabular-nums;
+    padding: 9px 11px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  .field input[type="number"]:focus-visible { outline: 2px solid var(--brand-purple); outline-offset: 1px; }
+  .range-row { display: flex; align-items: center; gap: 12px; }
+  .range-row input[type="range"] { flex: 1; accent-color: var(--brand-purple); }
+  .range-row output {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    min-width: 42px;
+    text-align: right;
+    color: var(--brand-magenta);
+  }
+  .check-row { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; font-size: 13.5px; color: var(--text-2); }
+  .check-row:last-child { margin-bottom: 0; }
+  .check-row input { accent-color: var(--brand-purple); width: 16px; height: 16px; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* Segmented (qualitative) controls */
+  .segmented { display: flex; gap: 6px; flex-wrap: wrap; }
+  .seg-btn {
+    flex: 1;
+    min-width: 78px;
+    padding: 9px 6px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-2);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+  }
+  .seg-btn.active { border-color: var(--brand-purple); background: color-mix(in srgb, var(--brand-purple) 16%, var(--surface-2)); color: var(--text); }
+  .seg-btn:focus-visible { outline: 2px solid var(--brand-purple); outline-offset: 2px; }
+
+  /* Tool checklist */
+  .tool-grid { display: flex; flex-direction: column; gap: 7px; max-height: 360px; overflow-y: auto; padding-right: 2px; margin-top: 4px; }
+  .tool-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface-2);
+    cursor: pointer;
+    font-size: 12.5px;
+  }
+  .tool-check:has(input:checked) { border-color: var(--brand-magenta); background: color-mix(in srgb, var(--brand-magenta) 9%, var(--surface-2)); }
+  .tool-check input { accent-color: var(--brand-purple); width: 15px; height: 15px; flex-shrink: 0; }
+  .tool-check .tool-main { flex: 1; display: flex; flex-direction: column; }
+  .tool-check .tool-cat { font-weight: 600; color: var(--text); }
+  .tool-check .tool-price { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--text-2); white-space: nowrap; }
+
+  .custom-tool-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .custom-tool-row input[type="text"], .custom-tool-row input[type="number"] {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  .custom-tool-row input[type="text"] { flex: 1; min-width: 140px; }
+  .custom-tool-row input[type="number"] { width: 90px; }
+  .custom-tool-row .btn { padding: 8px 14px; font-size: 12.5px; }
+  .custom-tool-item { border-color: var(--brand-purple); background: color-mix(in srgb, var(--brand-purple) 8%, var(--surface-2)); }
+  .custom-tool-remove {
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 2px;
+  }
+  .custom-tool-remove:hover { color: var(--bad); }
+
+  details.card { padding: 0; overflow: hidden; }
+  details summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 16px 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: "+"; font-size: 16px; color: var(--brand-purple); }
+  details[open] summary::after { content: "\2212"; }
+  details .details-body { padding: 4px 22px 22px; }
+  details p.hint2 { font-size: 12.5px; color: var(--muted); margin-bottom: 14px; }
+
+  /* ---------- Results ---------- */
+  .hero-tile {
+    background: linear-gradient(150deg, color-mix(in srgb, var(--brand-purple) 14%, var(--surface)), var(--surface));
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 26px 26px 22px;
+  }
+  .hero-label { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .hero-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(34px, 5vw, 48px);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(90deg, var(--brand-purple), var(--brand-magenta));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    line-height: 1.1;
+  }
+  .hero-sub { margin-top: 10px; font-size: 13.5px; color: var(--text-2); }
+  .hero-breakdown { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border); }
+  .hero-breakdown .item { font-size: 12.5px; color: var(--text-2); }
+  .hero-breakdown .item b { font-family: 'JetBrains Mono', monospace; color: var(--text); font-variant-numeric: tabular-nums; }
+
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 16px; }
+  @media (max-width: 720px) { .tiles { grid-template-columns: repeat(2, 1fr); } }
+  .tile { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .tile .t-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .tile .t-value { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .tile .t-note { font-size: 11.5px; color: var(--text-2); margin-top: 4px; }
+
+  /* Upside (revenue potential) callout — deliberately NOT hero-styled, kept separate from "ahorro" */
+  .upside-card {
+    margin-top: 16px;
+    padding: 16px 18px;
+    border-radius: 12px;
+    border: 1px dashed var(--brand-purple);
+    background: color-mix(in srgb, var(--brand-purple) 6%, var(--surface));
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .upside-card .u-label { font-size: 13px; color: var(--text-2); max-width: 46ch; }
+  .upside-card .u-label strong { color: var(--text); }
+  .upside-card .u-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--brand-purple);
+    white-space: nowrap;
+  }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 6px; margin-bottom: 18px; border-bottom: 1px solid var(--border); }
+  .tab-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: .2px;
+    padding: 10px 16px;
+    border: none;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .tab-btn.active { color: var(--brand-magenta); border-bottom-color: var(--brand-magenta); }
+  .tab-btn:focus-visible { outline: 2px solid var(--brand-purple); outline-offset: 2px; }
+  .tab-panel[hidden] { display: none; }
+
+  /* ---------- Tool comparison ---------- */
+  .ghl-note {
+    font-size: 12.5px;
+    color: var(--text-2);
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    background: var(--surface-2);
+    border-radius: 8px;
+    border-left: 3px solid var(--brand-purple);
+  }
+  .tool-compare-card { margin-top: 16px; }
+
+  /* Terminal-diff styled comparison, matching the brand's existing comparativa page */
+  .term { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-top: 4px; }
+  .term-bar { display: flex; align-items: center; gap: 7px; padding: 11px 16px; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .term-bar .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .term-bar .dot.r { background: #FF5F56; }
+  .term-bar .dot.y { background: #FFBD2E; }
+  .term-bar .dot.g { background: #27C93F; }
+  .term-title { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); margin-left: 6px; }
+  .term-body { padding: 6px 0; }
+  .diff-row {
+    display: grid;
+    grid-template-columns: 16px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+  }
+  .diff-row.minus { background: color-mix(in srgb, var(--bad) 7%, transparent); }
+  .diff-row.minus .sign { color: var(--bad); }
+  .diff-row.minus .amt { color: var(--bad); }
+  .diff-row.minus .label { color: var(--text-2); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--bad) 55%, transparent); }
+  .diff-row.plus { background: color-mix(in srgb, var(--brand-magenta) 12%, transparent); font-weight: 700; }
+  .diff-row.plus .sign { color: var(--brand-magenta); }
+  .diff-row.plus .amt { color: var(--brand-magenta); }
+  .diff-row.plus .label { color: var(--text); }
+  .tool-compare-empty { font-size: 13px; color: var(--muted); padding: 14px 16px; }
+  .tool-compare-total {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--brand-purple) 14%, transparent), color-mix(in srgb, var(--brand-magenta) 14%, transparent));
+    border: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .tool-compare-total .label { font-size: 12.5px; color: var(--text-2); }
+  .tool-compare-total .amount {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
+    font-size: 22px;
+    background: linear-gradient(90deg, var(--brand-purple), var(--brand-magenta));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    white-space: nowrap;
+  }
+
+  /* ---------- Chart ---------- */
+  .chart-card { margin-top: 16px; }
+  .chart-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .chart-title { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; }
+  .legend .l-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-2); }
+  .legend .swatch { width: 10px; height: 10px; border-radius: 2px; }
+  svg.roi-chart { width: 100%; height: auto; overflow: visible; }
+  svg.roi-chart text { font-family: 'JetBrains Mono', monospace; }
+
+  table.proj { width: 100%; border-collapse: collapse; margin-top: 18px; font-size: 13px; }
+  .table-wrap { overflow-x: auto; }
+  table.proj th, table.proj td {
+    text-align: right;
+    padding: 9px 10px;
+    font-variant-numeric: tabular-nums;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  table.proj th:first-child, table.proj td:first-child { text-align: left; font-variant-numeric: normal; }
+  table.proj th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .3px; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  table.proj td.pos { color: var(--good); font-weight: 600; }
+  table.proj td.neg { color: var(--bad); font-weight: 600; }
+
+  /* ---------- Budget configurator ---------- */
+  .suggest-btn-row { margin-bottom: 14px; }
+  .subtabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .subtab-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-2);
+    cursor: pointer;
+  }
+  .subtab-btn.active { border-color: var(--brand-magenta); color: var(--text); background: color-mix(in srgb, var(--brand-magenta) 12%, var(--surface-2)); }
+  .subtab-btn:focus-visible { outline: 2px solid var(--brand-purple); outline-offset: 2px; }
+  .subtab-panel[hidden] { display: none; }
+
+  .cfg-layout { display: grid; grid-template-columns: 1fr 320px; gap: 18px; align-items: start; }
+  @media (max-width: 820px) { .cfg-layout { grid-template-columns: 1fr; } .cfg-summary { position: static; } }
+  .cfg-summary { position: sticky; top: 12px; }
+  .base-card .card-price { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--brand-magenta); white-space: nowrap; }
+
+  .module-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 10px; border-radius: 10px; cursor: pointer; }
+  .module-item:hover { background: var(--surface-2); }
+  .module-item input[type="checkbox"] {
+    appearance: none; width: 18px; height: 18px; flex: none; margin-top: 2px;
+    border: 2px solid var(--border); border-radius: 5px; background: transparent; cursor: pointer; position: relative;
+  }
+  .module-item input[type="checkbox"]:checked { background: linear-gradient(135deg, var(--brand-purple), var(--brand-magenta)); border-color: transparent; }
+  .module-item input[type="checkbox"]:checked::after { content: "✓"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #fff; font-weight: 800; }
+  .module-text { flex: 1; }
+  .module-name { font-size: 14px; font-weight: 600; }
+  .module-scope { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .module-price { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: var(--brand-magenta); white-space: nowrap; padding-top: 1px; }
+
+  .module-sub { margin-left: 30px; padding: 8px 10px; border-radius: 8px; display: flex; align-items: center; gap: 10px; opacity: .4; pointer-events: none; transition: opacity .15s ease; }
+  .module-sub.active { opacity: 1; pointer-events: auto; }
+  .module-sub:hover.active { background: var(--surface-2); }
+  .module-sub input[type="checkbox"] { appearance: none; width: 15px; height: 15px; flex: none; border: 2px solid var(--border); border-radius: 4px; background: transparent; cursor: pointer; position: relative; }
+  .module-sub input[type="checkbox"]:checked { background: var(--brand-purple); border-color: transparent; }
+  .module-sub input[type="checkbox"]:checked::after { content: "✓"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #fff; font-weight: 800; }
+  .module-sub .module-name { font-size: 12.5px; font-weight: 500; color: var(--text-2); }
+  .module-sub .module-price { font-size: 12px; }
+
+  .module-flag { margin: 4px 10px 10px; padding: 9px 11px; border-radius: 8px; background: color-mix(in srgb, var(--brand-purple) 8%, transparent); border: 1px solid color-mix(in srgb, var(--brand-purple) 25%, transparent); font-size: 11.5px; color: var(--text-2); line-height: 1.5; }
+
+  .cfg-sum-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 2px; font-size: 13px; }
+  .cfg-sum-row .l { color: var(--muted); }
+  .cfg-sum-row .v { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  .cfg-sum-total { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 2px; margin-top: 4px; border-top: 1px solid var(--border); }
+  .cfg-sum-total .l { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .3px; }
+  .cfg-sum-total .v { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 800; background: linear-gradient(90deg, var(--brand-purple), var(--brand-magenta)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  .tier-block { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border); }
+  .tier-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .3px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .tier-auto-badge { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; background: color-mix(in srgb, var(--brand-purple) 16%, transparent); color: var(--brand-purple); padding: 2px 7px; border-radius: 999px; text-transform: none; letter-spacing: 0; }
+  .tier-opts { display: flex; flex-direction: column; gap: 7px; }
+  .tier-opt { display: flex; justify-content: space-between; align-items: center; padding: 9px 11px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; font-size: 12.5px; background: var(--surface-2); }
+  .tier-opt input { accent-color: var(--brand-purple); }
+  .tier-opt.selected { border-color: var(--brand-magenta); background: color-mix(in srgb, var(--brand-magenta) 8%, var(--surface-2)); }
+  .tier-opt .t-name { display: flex; align-items: center; gap: 8px; }
+  .tier-opt .t-price { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--brand-magenta); }
+
+  .cfg-extra { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .cfg-extra .title { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .3px; margin-bottom: 6px; }
+  .cfg-extra-line { font-size: 12px; color: var(--text-2); line-height: 1.7; }
+  .cfg-extra-line b { color: var(--text); }
+
+  .cfg-payback { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border); font-size: 12.5px; color: var(--text-2); }
+  .cfg-payback b { color: var(--text); font-family: 'JetBrains Mono', monospace; }
+
+  .client-final { padding: 24px 20px; text-align: center; background: linear-gradient(135deg, color-mix(in srgb, var(--brand-purple) 14%, transparent), color-mix(in srgb, var(--brand-magenta) 14%, transparent)); border-radius: 12px; }
+  .client-final .cf-label { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .3px; }
+  .client-final .cf-amount { font-family: 'JetBrains Mono', monospace; font-size: 34px; font-weight: 800; background: linear-gradient(90deg, var(--brand-purple), var(--brand-magenta)); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 4px; }
+  .client-final .cf-sub { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+  .client-final .cf-monthly { display: flex; justify-content: center; align-items: baseline; gap: 8px; padding-top: 14px; border-top: 1px dashed var(--border); }
+  .client-final .cf-monthly .m-amount { font-size: 20px; font-weight: 800; color: var(--brand-magenta); font-family: 'JetBrains Mono', monospace; }
+  .client-final .cf-monthly .m-label { font-size: 12px; color: var(--text-2); }
+
+  /* ---------- Methodology / footer ---------- */
+  .method { margin-top: 22px; }
+  .method ul { list-style: none; display: flex; flex-direction: column; gap: 7px; margin: 10px 0 14px; }
+  .method li { font-size: 12.5px; color: var(--text-2); padding-left: 16px; position: relative; }
+  .method li::before { content: "\2192"; position: absolute; left: 0; color: var(--brand-purple); }
+  .method .disclaimer { font-size: 11.5px; color: var(--muted); font-style: italic; }
+  footer {
+    margin-top: 34px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">brain&amp;bots / netlead-elite/</div>
+    <h1>Calculadora de ROI — <span>NetLead Elite</span></h1>
+    <p class="sub">Rellena los datos del negocio del cliente durante la llamada (o envíale este enlace para que los complete antes). Verás su ahorro de costes frente a las herramientas que usa hoy, el impacto de automatizar con NetLead y, aparte, los ingresos potenciales de recuperar leads perdidos. El paquete a presentar vive en su propia pestaña, para abrirla tú cuando toque.</p>
+    <div class="toolbar">
+      <button class="btn primary" id="btnDemo" type="button">Cargar ejemplo</button>
+      <button class="btn" id="btnReset" type="button">Vaciar formulario</button>
+      <span class="save-note" id="saveNote"></span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- ============ LEFT: FORM ============ -->
+    <form class="stack" id="roiForm" autocomplete="off">
+
+      <div class="card">
+        <div class="group-title">Negocio</div>
+        <fieldset class="stack" style="gap:14px;">
+          <div class="field">
+            <label for="facturacion">Facturación mensual actual (€)</label>
+            <input type="number" id="facturacion" min="0" step="100" value="0">
+          </div>
+          <div class="field">
+            <label for="equipo">Personas en el equipo (asistente, soporte, trafficker, closer…)</label>
+            <input type="number" id="equipo" min="0" step="1" value="0">
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="card">
+        <div class="group-title">Leads y ventas</div>
+        <fieldset class="stack" style="gap:14px;">
+          <div class="field">
+            <label for="leadsMes">Leads que recibe al mes</label>
+            <input type="number" id="leadsMes" min="0" step="1" value="0">
+          </div>
+          <div class="field">
+            <label for="ticketMedio">Ticket medio por venta (€)</label>
+            <input type="number" id="ticketMedio" min="0" step="50" value="0">
+          </div>
+          <div class="field">
+            <label for="tasaCierre">Tasa de cierre actual</label>
+            <div class="range-row">
+              <input type="range" id="tasaCierre" min="0" max="60" step="1" value="0">
+              <output for="tasaCierre" id="outTasaCierre">0 %</output>
+            </div>
+          </div>
+          <div class="field">
+            <label>¿Cómo describirías el seguimiento comercial hoy?</label>
+            <div class="segmented" id="segSeguimiento">
+              <button type="button" class="seg-btn" data-value="5">Excelente</button>
+              <button type="button" class="seg-btn" data-value="15">Bueno</button>
+              <button type="button" class="seg-btn active" data-value="30">Mejorable</button>
+              <button type="button" class="seg-btn" data-value="45">Flojo / no se mide</button>
+            </div>
+            <p class="hint">Es una estimación, no hace falta un dato exacto.</p>
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="card">
+        <div class="group-title">Personal y automatización</div>
+        <p class="hint" style="margin-bottom:10px;">Nos referimos a tareas repetitivas como: seguimiento de leads, agendar citas, actualizar el CRM/hojas de cálculo, mandar recordatorios, responder dudas repetitivas, gestionar accesos y comprobar los pagos hechos en la propia plataforma (esto no es contabilidad ni facturación — eso queda fuera).</p>
+        <fieldset class="stack" style="gap:14px;">
+          <div class="field">
+            <label for="gastoMensualPersonal">Gasto mensual en el personal/freelancers que hacen esas tareas (€)</label>
+            <input type="number" id="gastoMensualPersonal" min="0" step="50" value="0">
+            <p class="hint">Sueldos, asistentes, freelancers — aunque cobren por servicio y no por hora.</p>
+          </div>
+          <div class="field">
+            <label>De ese gasto, ¿cuánto se podría automatizar?</label>
+            <div class="segmented" id="segAutomatizacion">
+              <button type="button" class="seg-btn" data-value="20">Poco</button>
+              <button type="button" class="seg-btn active" data-value="40">Algo</button>
+              <button type="button" class="seg-btn" data-value="60">Bastante</button>
+              <button type="button" class="seg-btn" data-value="80">Casi todo</button>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="card">
+        <div class="group-title">Herramientas actuales</div>
+        <p class="hint" style="margin-bottom:10px;">Marca lo que usa hoy — calculamos el gasto aproximado con precios de mercado.</p>
+        <div class="tool-grid" id="toolGrid"></div>
+        <div id="customToolList" class="tool-grid" style="margin-top:6px;"></div>
+        <div class="custom-tool-row">
+          <input type="text" id="customToolName" placeholder="Otra herramienta que use (nombre)">
+          <input type="number" id="customToolPrice" placeholder="€/mes" min="0" step="1">
+          <button type="button" class="btn" id="btnAddCustomTool">+ Añadir</button>
+        </div>
+        <p class="hint">¿Usa algo que no está en la lista? Añádelo aquí con su precio y se suma igual.</p>
+        <div class="field" style="margin-top:12px;">
+          <label for="gastoHerramientasOverride">Ajuste manual del gasto total (opcional, si el cliente te da un número exacto)</label>
+          <input type="number" id="gastoHerramientasOverride" min="0" step="10" value="0">
+        </div>
+        <div class="field">
+          <label for="gastoPublicidad">Gasto mensual en publicidad (€)</label>
+          <input type="number" id="gastoPublicidad" min="0" step="50" value="0">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="group-title">Sobre el negocio</div>
+        <div class="check-row">
+          <input type="checkbox" id="chkCursos">
+          <label for="chkCursos" style="margin:0;">Vende cursos, membresías o programas high ticket</label>
+        </div>
+        <div class="check-row">
+          <input type="checkbox" id="chkLanzamientos">
+          <label for="chkLanzamientos" style="margin:0;">Vende por lanzamientos</label>
+        </div>
+        <div class="check-row">
+          <input type="checkbox" id="chkAgenteIA">
+          <label for="chkAgenteIA" style="margin:0;">Quiere un agente de IA (cualificación 24/7)</label>
+        </div>
+      </div>
+
+      <details class="card">
+        <summary>Ajustar supuestos del modelo</summary>
+        <div class="details-body stack" style="gap:14px;">
+          <p class="hint2">Estimación de Brain&amp;Bots sobre lo que suele conseguirse con NetLead Elite, no un dato del cliente. Ajústalo si tienes información mejor.</p>
+          <div class="field">
+            <label for="pctRecuperacionLeads">% de leads perdidos que se recuperarían con mejor seguimiento</label>
+            <div class="range-row">
+              <input type="range" id="pctRecuperacionLeads" min="0" max="100" step="5" value="60">
+              <output for="pctRecuperacionLeads" id="outPctRecuperacionLeads">60 %</output>
+            </div>
+          </div>
+        </div>
+      </details>
+    </form>
+
+    <!-- ============ RIGHT: RESULTS ============ -->
+    <div>
+      <div class="tabs">
+        <button type="button" class="tab-btn active" data-tab="calc">Calculadora</button>
+        <button type="button" class="tab-btn" data-tab="pkg">Paquete a presentar</button>
+      </div>
+
+      <div class="tab-panel" id="tabCalc">
+        <div class="hero-tile">
+          <div class="hero-label">Ahorro de costes mensual estimado</div>
+          <div class="hero-value" id="outAhorroTotal">0 €</div>
+          <div class="hero-sub" id="outPctFacturacion">—</div>
+          <div class="hero-breakdown">
+            <div class="item">Personal: <b id="bdPersonal">0 €</b></div>
+            <div class="item">Herramientas: <b id="bdHerramientas">0 €</b></div>
+          </div>
+        </div>
+
+        <div class="upside-card">
+          <div class="u-label"><strong>Ingresos potenciales adicionales</strong> por recuperar leads que hoy se pierden. No es ahorro de coste, es venta extra — no está sumado en la cifra de arriba. <span id="outLeadsNota"></span></div>
+          <div class="u-value" id="outIngresosPotenciales">0 €/mes</div>
+        </div>
+
+        <div class="tiles">
+          <div class="tile">
+            <div class="t-label">Ahorro en personal / mes</div>
+            <div class="t-value" id="outAhorroPersonal">0 €</div>
+            <div class="t-note">automatizando con NetLead</div>
+          </div>
+          <div class="tile">
+            <div class="t-label">Ahorro en herramientas</div>
+            <div class="t-value" id="outAhorroHerramientas">0 €</div>
+            <div class="t-note" id="outCostePorLead">al mes</div>
+          </div>
+          <div class="tile">
+            <div class="t-label">Payback de la inversión</div>
+            <div class="t-value" id="outPayback">—</div>
+            <div class="t-note">meses (sobre ahorro de costes)</div>
+          </div>
+        </div>
+
+        <div class="card tool-compare-card">
+          <div class="group-title">Comparativa: sus herramientas actuales vs. NetLead</div>
+          <p class="ghl-note">NetLead Elite sustituye estas suscripciones y además trae sus propias automatizaciones incluidas — por eso el "ahorro en personal" de arriba ya cuenta con ellas, no es un ahorro aparte.</p>
+          <div class="term">
+            <div class="term-bar">
+              <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+              <span class="term-title">herramientas_actuales.diff</span>
+            </div>
+            <div class="term-body" id="toolCompareList"></div>
+          </div>
+          <div class="tool-compare-total" id="toolCompareTotal"></div>
+        </div>
+
+        <div class="card chart-card">
+          <div class="chart-head">
+            <div class="chart-title">Ahorro de costes acumulado vs. coste — 3 / 6 / 12 meses</div>
+            <div class="legend">
+              <span class="l-item"><span class="swatch" style="background:var(--good);"></span>Ahorro acumulado</span>
+              <span class="l-item"><span class="swatch" style="background:var(--brand-magenta);"></span>Coste total (setup + mantenimiento)</span>
+            </div>
+          </div>
+          <svg class="roi-chart" id="roiChart" viewBox="0 0 640 300" role="img" aria-label="Comparativa de ahorro acumulado y coste total a 3, 6 y 12 meses"></svg>
+
+          <div class="table-wrap">
+            <table class="proj">
+              <thead>
+                <tr>
+                  <th>Periodo</th>
+                  <th>Ahorro acumulado</th>
+                  <th>Coste total</th>
+                  <th>Beneficio neto</th>
+                  <th>ROI</th>
+                </tr>
+              </thead>
+              <tbody id="tablaProyeccion"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card method">
+          <div class="group-title">Cómo se calcula</div>
+          <ul>
+            <li>Ahorro en personal = gasto mensual en personal/freelancers × % que se podría automatizar (ya incluye las automatizaciones que trae NetLead de serie).</li>
+            <li>Ahorro en herramientas = suma de las herramientas marcadas como actuales, más las que añadas manualmente (NetLead las sustituye por completo), o el ajuste manual si lo indicas.</li>
+            <li>El ahorro de costes (personal + herramientas) es lo único que cuenta para el payback y el ROI — es el número defendible.</li>
+            <li>Ingresos potenciales = leads/mes × % sin buen seguimiento × % recuperable × tasa de cierre × ticket medio. Se muestra aparte porque es venta adicional, no ahorro, y depende de más factores (oferta, cierre, mercado).</li>
+            <li>ROI = (ahorro acumulado − coste total) ÷ coste total, siendo coste total = implementación + mantenimiento acumulado.</li>
+          </ul>
+          <p class="disclaimer">Estimaciones orientativas a partir de los datos introducidos y de precios de mercado de referencia. El resultado real depende del punto de partida del negocio y de la implementación.</p>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tabPkg" hidden>
+        <div class="suggest-btn-row">
+          <button type="button" class="btn" id="btnSuggestModules">↺ Sugerir módulos según las respuestas del cliente</button>
+        </div>
+
+        <div class="subtabs">
+          <button type="button" class="subtab-btn active" data-subtab="internal">Vista interna</button>
+          <button type="button" class="subtab-btn" data-subtab="client">Vista cliente</button>
+        </div>
+
+        <div class="subtab-panel" id="subInternal">
+          <div class="cfg-layout">
+            <div>
+              <div class="card base-card">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <div class="group-title" style="margin:0;border:0;padding:0;">Plan Base (siempre incluido)</div>
+                  <span class="card-price">1.500 €</span>
+                </div>
+                <p class="hint" style="margin-top:10px;"><b>CRM + Pipeline</b> · <b>Formularios</b> · <b>Calendario de citas</b> · <b>Dashboard básico</b><br>+ 6 automatizaciones básicas: bienvenida automática, recordatorios de cita, respuesta a llamada perdida, movimiento automático en pipeline, etiquetado automático, reactivación simple.</p>
+              </div>
+              <div class="card" style="margin-top:16px;">
+                <div class="group-title">Módulos adicionales</div>
+                <div id="modulesListInternal"></div>
+              </div>
+            </div>
+
+            <div class="cfg-summary">
+              <div class="card">
+                <div class="group-title">Resumen</div>
+                <div class="cfg-sum-row"><span class="l">Plan Base</span><span class="v">1.500 €</span></div>
+                <div class="cfg-sum-row"><span class="l">Módulos seleccionados</span><span class="v" id="cfgModulesVal">0 €</span></div>
+                <div class="cfg-sum-total"><span class="l">setup total</span><span class="v" id="cfgSetupTotal">1.500 €</span></div>
+
+                <div class="tier-block">
+                  <div class="tier-label">Mensualidad <span class="tier-auto-badge" id="cfgAutoBadge">automático</span></div>
+                  <div class="tier-opts" id="cfgTierOpts"></div>
+                </div>
+
+                <div class="cfg-extra" id="cfgExtra" style="display:none;">
+                  <div class="title">// costes aparte (no incluidos arriba)</div>
+                  <div class="cfg-extra-line" id="cfgExtraBody"></div>
+                </div>
+
+                <div class="cfg-payback" id="cfgPaybackLine"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subtab-panel" id="subClient" hidden>
+          <div class="cfg-layout">
+            <div>
+              <div class="card base-card">
+                <div class="group-title">Incluido siempre</div>
+                <p class="hint" style="margin-top:10px;"><b>CRM + Pipeline</b> · <b>Formularios</b> · <b>Calendario de citas</b> · <b>Dashboard básico</b><br>+ automatizaciones básicas para que dejes de perseguir leads y citas a mano.</p>
+              </div>
+              <div class="card" style="margin-top:16px;">
+                <div class="group-title">¿Qué te gustaría añadir?</div>
+                <div id="modulesListClient"></div>
+              </div>
+            </div>
+
+            <div class="cfg-summary">
+              <div class="client-final">
+                <div class="cf-label">Precio de implementación</div>
+                <div class="cf-amount" id="cfgClientSetupTotal">1.500 €</div>
+                <div class="cf-sub">pago único</div>
+                <div class="cf-monthly">
+                  <span class="m-amount" id="cfgClientMonthlyTotal">147 €</span>
+                  <span class="m-label">/mes · herramienta + soporte + actualizaciones + 2 cambios/mes</span>
+                </div>
+              </div>
+              <div class="cfg-extra" id="cfgExtraClient" style="display:none; margin-top:14px; padding:14px; border:1px solid var(--border); border-radius:10px;">
+                <div class="title">// costes aparte</div>
+                <div class="cfg-extra-line" id="cfgExtraBodyClient"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>Brain&amp;Bots · NetLead Elite</span>
+    <span id="footStamp"></span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var TOOLS = [
+    { id: 'crm', cat: 'CRM', price: 20 },
+    { id: 'funnels', cat: 'Funnels / páginas de venta', price: 97 },
+    { id: 'email', cat: 'Email marketing', price: 49 },
+    { id: 'whatsapp', cat: 'WhatsApp marketing', price: 25 },
+    { id: 'web', cat: 'Web / sitio', price: 27 },
+    { id: 'forms', cat: 'Encuestas y formularios', price: 29 },
+    { id: 'citas', cat: 'Reserva de citas', price: 12 },
+    { id: 'automatizacion', cat: 'Automatización de flujos', price: 30 },
+    { id: 'cursos', cat: 'Plataforma de cursos', price: 149 },
+    { id: 'comunidad', cat: 'Comunidad', price: 99 },
+    { id: 'centralita', cat: 'Centralita virtual y tracking', price: 45 },
+    { id: 'proyectos', cat: 'Gestor de proyectos', price: 12 },
+    { id: 'redes', cat: 'Gestor de redes sociales', price: 18 },
+    { id: 'ia', cat: 'Agentes de IA', price: 40 },
+    { id: 'chat', cat: 'Chat de equipo', price: 9 },
+    { id: 'firma', cat: 'Firma de documentos', price: 15 },
+    { id: 'analitica', cat: 'Analítica + atribución de Ads', price: 39 },
+    { id: 'omnicanal', cat: 'Comunicación omnicanal', price: 55 }
+  ];
+
+  var MODULES = [
+    { id: 'funnel', name: 'Funnel', scope: 'Máx. 4 pasos (ej: registro → visionado y agenda → prellamada → el que necesite el cliente)', price: 250 },
+    { id: 'web', name: 'Web', scope: 'Máx. 4 páginas: inicio, servicios/precios, quiénes somos, contacto', price: 300 },
+    { id: 'email', name: 'Email marketing', scope: 'Secuencias + newsletters', price: 200 },
+    { id: 'whatsapp', name: 'WhatsApp marketing', scope: 'Automatización por WhatsApp', price: 150, flag: 'WhatsApp lleva 12€/mes aparte de plataforma (se contrata dentro de la herramienta) + los mensajes los paga el cliente según su volumen.' },
+    { id: 'omnicanal', name: 'Comunicación omnicanal', scope: 'Bandeja unificada de todos los canales', price: 150 },
+    { id: 'cursos', name: 'Cursos / Membresía', scope: 'Área de formación con contenido drip', price: 400, eliteTrigger: true },
+    { id: 'comunidad', name: 'Comunidad', scope: 'Espacio de comunidad con posts y foros', price: 200, eliteTrigger: true },
+    { id: 'ia', name: 'Agentes de IA', scope: '1 canal incluido (ej. WhatsApp)', price: 450, eliteTrigger: true, sub: { id: 'ia2', name: '+ 2º canal de IA', price: 200 } },
+    { id: 'redes', name: 'Gestor de redes sociales', scope: 'Planificación multi-red', price: 100 },
+    { id: 'firma', name: 'Firma de documentos', scope: 'Contratos integrados al CRM', price: 80 },
+    { id: 'dashboard-avz', name: 'Dashboard avanzado + Atribución de Ads', scope: 'Atribución de campañas de Meta, Google y TikTok Ads cruzada con ventas', price: 200 },
+    { id: 'ads-automation', name: 'Automatizaciones de Ads', scope: 'Meta, Google y TikTok Ads: leads de formularios sincronizados al CRM al instante, alertas de rendimiento y pausa automática de anuncios con bajo rendimiento', price: 300, eliteTrigger: true },
+    { id: 'informes', name: 'Informes y métricas', scope: 'Informe periódico automático (leads, ventas, gasto en ads) enviado por email o WhatsApp', price: 150 },
+    { id: 'reputacion', name: 'Reputación', scope: 'Solicitud automática de reseñas', price: 70 }
+  ];
+  var TIERS = [
+    { id: 'base', name: 'Mantenimiento Base', price: 147 },
+    { id: 'growth', name: 'Mantenimiento Growth', price: 197 },
+    { id: 'elite', name: 'Mantenimiento Elite', price: 297 }
+  ];
+  var BASE_SETUP = 1500;
+  var cfgState = { modules: {}, ia2: false, tierOverride: null };
+  var SETUP_TOTAL = BASE_SETUP;
+  var MAINTENANCE = TIERS[0].price;
+  var PERIODS = [3, 6, 12];
+  var STORE_KEY = 'netlead-roi-inputs-v3';
+
+  var NUM_IDS = ['facturacion', 'equipo', 'gastoMensualPersonal', 'leadsMes', 'ticketMedio', 'gastoHerramientasOverride', 'gastoPublicidad'];
+  var RANGE_IDS = ['tasaCierre', 'pctRecuperacionLeads'];
+  var CHK_IDS = ['chkCursos', 'chkLanzamientos', 'chkAgenteIA'];
+  var SEGMENTS = [
+    { id: 'segSeguimiento', key: 'pctLeadsPerdidos', fallback: 30 },
+    { id: 'segAutomatizacion', key: 'nivelAutomatizacion', fallback: 40 }
+  ];
+
+  var eurFmt = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+  var eurFmt1 = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 1 });
+  var numFmt = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 });
+
+  function el(id) { return document.getElementById(id); }
+  function num(id) { var v = parseFloat(el(id).value); return isNaN(v) ? 0 : v; }
+  function fmtEUR(n) { return eurFmt.format(n || 0); }
+  function fmtEURCompact(n) {
+    var v = n || 0;
+    if (Math.abs(v) >= 10000) { return eurFmt.format(Math.round(v / 100) * 100); }
+    return eurFmt.format(v);
+  }
+
+  function buildToolGrid() {
+    var grid = el('toolGrid');
+    grid.innerHTML = TOOLS.map(function (t) {
+      return '<label class="tool-check">' +
+        '<input type="checkbox" class="tool-checkbox" data-id="' + t.id + '">' +
+        '<span class="tool-main"><span class="tool-cat">' + t.cat + '</span></span>' +
+        '<span class="tool-price">' + fmtEUR(t.price) + '</span>' +
+        '</label>';
+    }).join('');
+  }
+
+  var customTools = [];
+
+  function renderCustomTools() {
+    var list = el('customToolList');
+    if (!customTools.length) { list.innerHTML = ''; return; }
+    list.innerHTML = customTools.map(function (t) {
+      return '<div class="tool-check custom-tool-item">' +
+        '<span class="tool-main"><span class="tool-cat">' + t.name + '</span></span>' +
+        '<span class="tool-price">' + fmtEUR(t.price) + '</span>' +
+        '<button type="button" class="custom-tool-remove" data-id="' + t.id + '" aria-label="Quitar ' + t.name + '">×</button>' +
+        '</div>';
+    }).join('');
+  }
+
+  function addCustomTool() {
+    var nameEl = el('customToolName');
+    var priceEl = el('customToolPrice');
+    var name = nameEl.value.trim();
+    var price = parseFloat(priceEl.value);
+    if (!name || isNaN(price) || price <= 0) return;
+    customTools.push({ id: 'custom-' + Date.now(), name: name, price: price });
+    nameEl.value = '';
+    priceEl.value = '';
+    nameEl.focus();
+    renderCustomTools();
+    calcular();
+  }
+
+  function getCheckedToolIds() {
+    return Array.from(document.querySelectorAll('.tool-checkbox:checked')).map(function (cb) { return cb.dataset.id; });
+  }
+
+  function toolsSum(ids) {
+    return TOOLS.filter(function (t) { return ids.indexOf(t.id) !== -1; }).reduce(function (a, t) { return a + t.price; }, 0);
+  }
+
+  function moduleRowHTML(m, showPrice) {
+    var priceHtml = showPrice ? '<div class="module-price">+' + fmtEUR(m.price) + '</div>' : '';
+    var subHtml = '';
+    if (m.sub) {
+      var subPrice = showPrice ? '<div class="module-price">+' + fmtEUR(m.sub.price) + '</div>' : '';
+      subHtml = '<label class="module-sub" data-sub-of="' + m.id + '">' +
+        '<input type="checkbox" class="module-sub-checkbox" data-subid="' + m.sub.id + '">' +
+        '<div class="module-text"><div class="module-name">' + m.sub.name + '</div></div>' + subPrice +
+        '</label>';
+    }
+    var flagHtml = m.flag ? '<div class="module-flag">⚠️ ' + m.flag + '</div>' : '';
+    return '<label class="module-item">' +
+      '<input type="checkbox" class="module-checkbox" data-id="' + m.id + '">' +
+      '<div class="module-text"><div class="module-name">' + m.name + '</div><div class="module-scope">' + m.scope + '</div></div>' +
+      priceHtml +
+      '</label>' + subHtml + flagHtml;
+  }
+
+  function buildModulesUI() {
+    el('modulesListInternal').innerHTML = MODULES.map(function (m) { return moduleRowHTML(m, true); }).join('');
+    el('modulesListClient').innerHTML = MODULES.map(function (m) { return moduleRowHTML(m, false); }).join('');
+    el('cfgTierOpts').innerHTML = TIERS.map(function (t) {
+      return '<label class="tier-opt" data-tier="' + t.id + '">' +
+        '<span class="t-name"><input type="radio" name="cfgTier" value="' + t.id + '">' + t.name + '</span>' +
+        '<span class="t-price">' + fmtEUR(t.price) + '/mes</span>' +
+        '</label>';
+    }).join('');
+  }
+
+  function calcAutoTier() {
+    var anyEliteTrigger = MODULES.some(function (m) { return m.eliteTrigger && cfgState.modules[m.id]; }) || cfgState.ia2;
+    var addonCount = Object.keys(cfgState.modules).filter(function (k) { return cfgState.modules[k]; }).length;
+    if (anyEliteTrigger) return 'elite';
+    if (addonCount >= 1) return 'growth';
+    return 'base';
+  }
+
+  function syncModuleCheckboxes() {
+    document.querySelectorAll('.module-checkbox').forEach(function (cb) { cb.checked = !!cfgState.modules[cb.dataset.id]; });
+    document.querySelectorAll('.module-sub-checkbox[data-subid="ia2"]').forEach(function (cb) { cb.checked = cfgState.ia2; });
+    document.querySelectorAll('[data-sub-of="ia"]').forEach(function (elx) { elx.classList.toggle('active', !!cfgState.modules['ia']); });
+  }
+
+  function renderConfig() {
+    var modulesTotal = 0;
+    MODULES.forEach(function (m) { if (cfgState.modules[m.id]) modulesTotal += m.price; });
+    if (!cfgState.modules['ia']) cfgState.ia2 = false;
+    if (cfgState.ia2) { modulesTotal += MODULES.filter(function (m) { return m.id === 'ia'; })[0].sub.price; }
+
+    SETUP_TOTAL = BASE_SETUP + modulesTotal;
+    syncModuleCheckboxes();
+
+    el('cfgModulesVal').textContent = fmtEUR(modulesTotal);
+    el('cfgSetupTotal').textContent = fmtEUR(SETUP_TOTAL);
+
+    var autoTier = calcAutoTier();
+    var activeTier = cfgState.tierOverride || autoTier;
+    var activeTierObj = TIERS.filter(function (t) { return t.id === activeTier; })[0];
+    MAINTENANCE = activeTierObj.price;
+
+    el('cfgAutoBadge').textContent = cfgState.tierOverride ? 'manual' : 'automático';
+    document.querySelectorAll('.tier-opt').forEach(function (elx) {
+      var isSel = elx.dataset.tier === activeTier;
+      elx.classList.toggle('selected', isSel);
+      elx.querySelector('input').checked = isSel;
+    });
+
+    var lines = [];
+    if (cfgState.modules['whatsapp']) lines.push('<b>WhatsApp:</b> 12 €/mes de plataforma + mensajes a cargo del cliente');
+    var extraBox = el('cfgExtra'), extraBody = el('cfgExtraBody');
+    var extraBoxClient = el('cfgExtraClient'), extraBodyClient = el('cfgExtraBodyClient');
+    if (lines.length) {
+      extraBox.style.display = 'block'; extraBody.innerHTML = lines.join('<br>');
+      extraBoxClient.style.display = 'block'; extraBodyClient.innerHTML = lines.join('<br>');
+    } else {
+      extraBox.style.display = 'none';
+      extraBoxClient.style.display = 'none';
+    }
+
+    el('cfgClientSetupTotal').textContent = fmtEUR(SETUP_TOTAL);
+    el('cfgClientMonthlyTotal').textContent = fmtEUR(activeTierObj.price);
+
+    calcular();
+  }
+
+  function suggestModules() {
+    var s = readState();
+    if (s.cursos) cfgState.modules['cursos'] = true;
+    if (s.agenteIA) cfgState.modules['ia'] = true;
+    var toolToModule = { whatsapp: 'whatsapp', web: 'web', redes: 'redes', firma: 'firma', omnicanal: 'omnicanal', comunidad: 'comunidad', analitica: 'dashboard-avz' };
+    (s.tools || []).forEach(function (toolId) {
+      if (toolToModule[toolId]) cfgState.modules[toolToModule[toolId]] = true;
+    });
+    cfgState.tierOverride = null;
+    renderConfig();
+  }
+
+  function getSegValue(containerId, fallback) {
+    var active = document.querySelector('#' + containerId + ' .seg-btn.active');
+    return active ? parseFloat(active.dataset.value) : fallback;
+  }
+
+  function setSegmented(containerId, value) {
+    var buttons = document.querySelectorAll('#' + containerId + ' .seg-btn');
+    var matched = false;
+    buttons.forEach(function (b) {
+      var isMatch = parseFloat(b.dataset.value) === Number(value);
+      b.classList.toggle('active', isMatch);
+      if (isMatch) matched = true;
+    });
+    if (!matched && buttons.length) buttons[0].classList.remove('active');
+  }
+
+  function readState() {
+    return {
+      facturacion: num('facturacion'),
+      equipo: num('equipo'),
+      gastoMensualPersonal: num('gastoMensualPersonal'),
+      leadsMes: num('leadsMes'),
+      ticketMedio: num('ticketMedio'),
+      tasaCierre: num('tasaCierre'),
+      pctLeadsPerdidos: getSegValue('segSeguimiento', 30),
+      nivelAutomatizacion: getSegValue('segAutomatizacion', 40),
+      gastoHerramientasOverride: num('gastoHerramientasOverride'),
+      gastoPublicidad: num('gastoPublicidad'),
+      cursos: el('chkCursos').checked,
+      lanzamientos: el('chkLanzamientos').checked,
+      agenteIA: el('chkAgenteIA').checked,
+      pctRecuperacionLeads: num('pctRecuperacionLeads'),
+      tools: getCheckedToolIds(),
+      customTools: customTools
+    };
+  }
+
+  function computeMetrics(s) {
+    var ahorroPersonalMes = s.gastoMensualPersonal * (s.nivelAutomatizacion / 100);
+
+    var leadsPerdidosMes = s.leadsMes * (s.pctLeadsPerdidos / 100);
+    var leadsRecuperadosMes = leadsPerdidosMes * (s.pctRecuperacionLeads / 100);
+    var valorLeadsRecuperadosMes = leadsRecuperadosMes * (s.tasaCierre / 100) * s.ticketMedio;
+
+    var customTotal = (s.customTools || []).reduce(function (a, t) { return a + t.price; }, 0);
+    var checklistTotal = toolsSum(s.tools) + customTotal;
+    var ahorroHerramientasMes = s.gastoHerramientasOverride > 0 ? s.gastoHerramientasOverride : checklistTotal;
+
+    // Only real cost reduction counts as "ahorro" — revenue upside (leads recuperados) is kept separate
+    // and never folded into this figure, the %-de-facturación, the chart, the table or the payback.
+    var ahorroTotalMensual = ahorroPersonalMes + ahorroHerramientasMes;
+    var pctFacturacion = s.facturacion > 0 ? (ahorroTotalMensual / s.facturacion) * 100 : null;
+    var costePorLead = s.leadsMes > 0 ? s.gastoPublicidad / s.leadsMes : null;
+
+    return {
+      ahorroPersonalMes: ahorroPersonalMes,
+      leadsPerdidosMes: leadsPerdidosMes,
+      leadsRecuperadosMes: leadsRecuperadosMes,
+      valorLeadsRecuperadosMes: valorLeadsRecuperadosMes,
+      checklistTotal: checklistTotal,
+      ahorroHerramientasMes: ahorroHerramientasMes,
+      ahorroTotalMensual: ahorroTotalMensual,
+      pctFacturacion: pctFacturacion,
+      costePorLead: costePorLead
+    };
+  }
+
+  function computeProjection(ahorroTotalMensual, inversionInicial) {
+    return PERIODS.map(function (n) {
+      var ahorroAcumulado = ahorroTotalMensual * n;
+      var costeTotal = inversionInicial + MAINTENANCE * n;
+      var beneficioNeto = ahorroAcumulado - costeTotal;
+      var roiPct = costeTotal > 0 ? (beneficioNeto / costeTotal) * 100 : null;
+      return { n: n, ahorroAcumulado: ahorroAcumulado, costeTotal: costeTotal, beneficioNeto: beneficioNeto, roiPct: roiPct };
+    });
+  }
+
+  function computePayback(ahorroTotalMensual, inversionInicial) {
+    var netMonthly = ahorroTotalMensual - MAINTENANCE;
+    if (netMonthly <= 0) return null;
+    return inversionInicial / netMonthly;
+  }
+
+  function renderChart(periods) {
+    var svg = el('roiChart');
+    var W = 640, H = 300;
+    var margin = { top: 26, right: 12, bottom: 34, left: 12 };
+    var plotW = W - margin.left - margin.right;
+    var plotH = H - margin.top - margin.bottom;
+    var groupW = plotW / periods.length;
+    var barW = 46, gapBar = 10;
+
+    var maxVal = 1;
+    periods.forEach(function (p) { maxVal = Math.max(maxVal, p.ahorroAcumulado, p.costeTotal); });
+    var scale = plotH / (maxVal * 1.18);
+
+    var parts = [];
+    parts.push('<line x1="' + margin.left + '" y1="' + (margin.top + plotH) + '" x2="' + (W - margin.right) + '" y2="' + (margin.top + plotH) + '" stroke="var(--border)" stroke-width="1"/>');
+
+    periods.forEach(function (p, i) {
+      var groupX = margin.left + i * groupW;
+      var pairW = barW * 2 + gapBar;
+      var startX = groupX + (groupW - pairW) / 2;
+
+      var hAhorro = p.ahorroAcumulado * scale;
+      var hCoste = p.costeTotal * scale;
+      var yAhorro = margin.top + plotH - hAhorro;
+      var yCoste = margin.top + plotH - hCoste;
+
+      parts.push('<rect x="' + startX + '" y="' + yAhorro + '" width="' + barW + '" height="' + Math.max(hAhorro, 1) + '" rx="4" fill="var(--good)"/>');
+      parts.push('<text x="' + (startX + barW / 2) + '" y="' + (yAhorro - 8) + '" text-anchor="middle" font-size="11" fill="var(--text)" font-weight="600">' + fmtEURCompact(p.ahorroAcumulado) + '</text>');
+
+      var cx = startX + barW + gapBar;
+      parts.push('<rect x="' + cx + '" y="' + yCoste + '" width="' + barW + '" height="' + Math.max(hCoste, 1) + '" rx="4" fill="var(--brand-magenta)"/>');
+      parts.push('<text x="' + (cx + barW / 2) + '" y="' + (yCoste - 8) + '" text-anchor="middle" font-size="11" fill="var(--text)" font-weight="600">' + fmtEURCompact(p.costeTotal) + '</text>');
+
+      var netColor = p.beneficioNeto >= 0 ? 'var(--good)' : 'var(--bad)';
+      var netSign = p.beneficioNeto >= 0 ? '+' : '−';
+      parts.push('<text x="' + (groupX + groupW / 2) + '" y="' + (margin.top - 8) + '" text-anchor="middle" font-size="11.5" font-weight="700" fill="' + netColor + '">' + netSign + fmtEURCompact(Math.abs(p.beneficioNeto)) + ' neto</text>');
+
+      parts.push('<text x="' + (groupX + groupW / 2) + '" y="' + (margin.top + plotH + 20) + '" text-anchor="middle" font-size="12" fill="var(--muted)">' + p.n + ' meses</text>');
+    });
+
+    svg.innerHTML = parts.join('');
+  }
+
+  function renderTable(periods) {
+    var tbody = el('tablaProyeccion');
+    tbody.innerHTML = periods.map(function (p) {
+      var netClass = p.beneficioNeto >= 0 ? 'pos' : 'neg';
+      var roi = p.roiPct === null ? '—' : (p.roiPct >= 0 ? '+' : '') + numFmt.format(p.roiPct) + ' %';
+      return '<tr>' +
+        '<td>' + p.n + ' meses</td>' +
+        '<td>' + fmtEUR(p.ahorroAcumulado) + '</td>' +
+        '<td>' + fmtEUR(p.costeTotal) + '</td>' +
+        '<td class="' + netClass + '">' + (p.beneficioNeto >= 0 ? '+' : '−') + fmtEUR(Math.abs(p.beneficioNeto)) + '</td>' +
+        '<td class="' + netClass + '">' + roi + '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function renderToolCompare(ids, custom, override) {
+    var listEl = el('toolCompareList');
+    var totalEl = el('toolCompareTotal');
+    var checked = ids.map(function (id) { return TOOLS.filter(function (t) { return t.id === id; })[0]; }).filter(Boolean);
+    var extras = (custom || []).map(function (t) { return { cat: t.name, price: t.price }; });
+    var all = checked.concat(extras);
+    if (!all.length) {
+      listEl.innerHTML = '<p class="tool-compare-empty">Marca en el formulario las herramientas que usa el cliente (o añade una manualmente) para ver aquí la comparativa.</p>';
+      totalEl.innerHTML = '';
+      return;
+    }
+    var rows = all.map(function (t) {
+      return '<div class="diff-row minus"><span class="sign">−</span><span class="label">' + t.cat + '</span><span class="amt">' + fmtEUR(t.price) + '</span></div>';
+    }).join('');
+    rows += '<div class="diff-row plus"><span class="sign">+</span><span class="label">NetLead Elite — todo en un solo sitio</span><span class="amt">incluido</span></div>';
+    listEl.innerHTML = rows;
+    var checklistTotal = all.reduce(function (a, t) { return a + t.price; }, 0);
+    var used = override > 0 ? override : checklistTotal;
+    var label = override > 0 ? 'Ajuste manual indicado por el cliente' : 'Gasto actual estimado (según herramientas marcadas)';
+    totalEl.innerHTML = '<span class="label">' + label + ': ' + fmtEUR(used) + '/mes → con NetLead: incluido</span>' +
+      '<span class="amount">Ahorro ' + fmtEUR(used) + '/mes</span>';
+  }
+
+  function calcular() {
+    var s = readState();
+    var metrics = computeMetrics(s);
+
+    el('outAhorroTotal').textContent = fmtEUR(metrics.ahorroTotalMensual);
+    el('outPctFacturacion').textContent = metrics.pctFacturacion === null
+      ? 'Introduce la facturación para ver el % de impacto.'
+      : 'Equivale al ' + numFmt.format(metrics.pctFacturacion) + ' % de su facturación mensual actual.';
+
+    el('bdPersonal').textContent = fmtEUR(metrics.ahorroPersonalMes);
+    el('bdHerramientas').textContent = fmtEUR(metrics.ahorroHerramientasMes);
+
+    el('outAhorroPersonal').textContent = fmtEUR(metrics.ahorroPersonalMes);
+    el('outAhorroHerramientas').textContent = fmtEUR(metrics.ahorroHerramientasMes);
+    el('outCostePorLead').textContent = metrics.costePorLead === null ? 'al mes' : 'al mes · ' + eurFmt1.format(metrics.costePorLead) + '/lead en ads';
+
+    el('outIngresosPotenciales').textContent = fmtEUR(metrics.valorLeadsRecuperadosMes) + '/mes';
+    el('outLeadsNota').textContent = '(~' + numFmt.format(metrics.leadsRecuperadosMes) + ' leads/mes recuperados)';
+
+    renderToolCompare(s.tools, s.customTools, s.gastoHerramientasOverride);
+
+    var projection = computeProjection(metrics.ahorroTotalMensual, SETUP_TOTAL);
+    renderChart(projection);
+    renderTable(projection);
+
+    var payback = computePayback(metrics.ahorroTotalMensual, SETUP_TOTAL);
+    el('outPayback').textContent = payback === null ? '—' : numFmt.format(payback);
+    el('cfgPaybackLine').innerHTML = payback === null
+      ? 'Con el ahorro de costes actual (pestaña Calculadora), el ahorro mensual no cubre el mantenimiento (' + fmtEUR(MAINTENANCE) + '/mes). Revisa los datos del cliente o el presupuesto.'
+      : 'Con el ahorro de costes de la pestaña Calculadora, recuperas esta inversión de ' + fmtEUR(SETUP_TOTAL) + ' en <b>' + numFmt.format(payback) + ' meses</b> (mantenimiento: ' + fmtEUR(MAINTENANCE) + '/mes).';
+
+    saveState(s);
+  }
+
+  function saveState(s) {
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify({ s: s, cfg: cfgState }));
+      el('saveNote').textContent = 'Guardado en este navegador';
+    } catch (e) { /* private mode / storage blocked: ignore */ }
+  }
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return;
+      var data = JSON.parse(raw);
+      customTools = (data.s && data.s.customTools) || [];
+      applyState(data.s || {});
+      if (data.cfg) { cfgState = data.cfg; }
+    } catch (e) { /* ignore */ }
+  }
+
+  function applyState(s) {
+    NUM_IDS.forEach(function (id) { if (s[id] !== undefined) el(id).value = s[id]; });
+    if (s.tasaCierre !== undefined) el('tasaCierre').value = s.tasaCierre;
+    if (s.pctRecuperacionLeads !== undefined) el('pctRecuperacionLeads').value = s.pctRecuperacionLeads;
+    SEGMENTS.forEach(function (seg) { if (s[seg.key] !== undefined) setSegmented(seg.id, s[seg.key]); });
+    if (s.cursos !== undefined) el('chkCursos').checked = s.cursos;
+    if (s.lanzamientos !== undefined) el('chkLanzamientos').checked = s.lanzamientos;
+    if (s.agenteIA !== undefined) el('chkAgenteIA').checked = s.agenteIA;
+    if (s.tools !== undefined) {
+      document.querySelectorAll('.tool-checkbox').forEach(function (cb) { cb.checked = s.tools.indexOf(cb.dataset.id) !== -1; });
+    }
+    if (s.customTools !== undefined) { customTools = s.customTools; }
+    renderCustomTools();
+    syncRangeOutputs();
+  }
+
+  function syncRangeOutputs() {
+    el('outTasaCierre').textContent = el('tasaCierre').value + ' %';
+    el('outPctRecuperacionLeads').textContent = el('pctRecuperacionLeads').value + ' %';
+  }
+
+  // Nota: leadsMes × tasaCierre × ticketMedio ≈ facturación, para que el ejemplo sea internamente consistente.
+  var DEMO = {
+    facturacion: 9000, equipo: 4,
+    gastoMensualPersonal: 2000,
+    leadsMes: 50, ticketMedio: 1000, tasaCierre: 18,
+    pctLeadsPerdidos: 30, nivelAutomatizacion: 40,
+    gastoHerramientasOverride: 0, gastoPublicidad: 1800,
+    cursos: true, lanzamientos: true, agenteIA: false,
+    pctRecuperacionLeads: 60,
+    tools: ['crm', 'funnels', 'email', 'whatsapp', 'forms', 'citas', 'automatizacion', 'redes', 'chat'],
+    customTools: [{ id: 'custom-demo', name: 'Software de facturación (no listado)', price: 25 }]
+  };
+
+  function wireEvents() {
+    NUM_IDS.concat(RANGE_IDS).forEach(function (id) {
+      el(id).addEventListener('input', function () {
+        if (RANGE_IDS.indexOf(id) !== -1) syncRangeOutputs();
+        calcular();
+      });
+    });
+    CHK_IDS.forEach(function (id) { el(id).addEventListener('change', calcular); });
+
+    document.querySelectorAll('.seg-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var siblings = btn.parentElement.querySelectorAll('.seg-btn');
+        siblings.forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        calcular();
+      });
+    });
+
+    document.addEventListener('change', function (e) {
+      if (e.target.classList && e.target.classList.contains('tool-checkbox')) { calcular(); return; }
+      if (e.target.classList && e.target.classList.contains('module-checkbox')) {
+        cfgState.modules[e.target.dataset.id] = e.target.checked;
+        cfgState.tierOverride = null;
+        renderConfig();
+        return;
+      }
+      if (e.target.classList && e.target.classList.contains('module-sub-checkbox') && e.target.dataset.subid === 'ia2') {
+        cfgState.ia2 = e.target.checked;
+        cfgState.tierOverride = null;
+        renderConfig();
+        return;
+      }
+      if (e.target.name === 'cfgTier') {
+        cfgState.tierOverride = e.target.value;
+        renderConfig();
+      }
+    });
+
+    el('btnAddCustomTool').addEventListener('click', addCustomTool);
+    ['customToolName', 'customToolPrice'].forEach(function (id) {
+      el(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); addCustomTool(); } });
+    });
+    document.addEventListener('click', function (e) {
+      if (e.target.classList && e.target.classList.contains('custom-tool-remove')) {
+        var id = e.target.dataset.id;
+        customTools = customTools.filter(function (t) { return t.id !== id; });
+        renderCustomTools();
+        calcular();
+      }
+    });
+
+    el('btnSuggestModules').addEventListener('click', suggestModules);
+
+    document.querySelectorAll('.tab-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        el('tabCalc').hidden = btn.dataset.tab !== 'calc';
+        el('tabPkg').hidden = btn.dataset.tab !== 'pkg';
+      });
+    });
+
+    document.querySelectorAll('.subtab-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.subtab-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        el('subInternal').hidden = btn.dataset.subtab !== 'internal';
+        el('subClient').hidden = btn.dataset.subtab !== 'client';
+      });
+    });
+
+    el('btnDemo').addEventListener('click', function () {
+      applyState(DEMO);
+      cfgState = { modules: {}, ia2: false, tierOverride: null };
+      renderConfig();
+    });
+    el('btnReset').addEventListener('click', function () {
+      var empty = { facturacion: 0, equipo: 0, gastoMensualPersonal: 0, leadsMes: 0, ticketMedio: 0, gastoHerramientasOverride: 0, gastoPublicidad: 0, tasaCierre: 0, pctRecuperacionLeads: 60, pctLeadsPerdidos: 30, nivelAutomatizacion: 40, cursos: false, lanzamientos: false, agenteIA: false, tools: [], customTools: [] };
+      applyState(empty);
+      cfgState = { modules: {}, ia2: false, tierOverride: null };
+      try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+      renderConfig();
+    });
+  }
+
+  function init() {
+    buildToolGrid();
+    buildModulesUI();
+    loadState();
+    syncRangeOutputs();
+    wireEvents();
+    renderConfig();
+    el('footStamp').textContent = 'v3 · calculadora interna';
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+</body>
+</html>
