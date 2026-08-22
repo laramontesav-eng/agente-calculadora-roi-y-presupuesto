@@ -423,6 +423,14 @@
   .subtab-btn:focus-visible { outline: 2px solid var(--brand-purple); outline-offset: 2px; }
   .subtab-panel[hidden] { display: none; }
 
+  #tabPkg:fullscreen, #tabPkg:-webkit-full-screen {
+    background: var(--bg);
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 24px 60px;
+    overflow-y: auto;
+  }
+
   .cfg-layout { display: grid; grid-template-columns: 1fr 320px; gap: 18px; align-items: start; }
   @media (max-width: 820px) { .cfg-layout { grid-template-columns: 1fr; } .cfg-summary { position: static; } }
   .cfg-summary { position: sticky; top: 12px; }
@@ -737,8 +745,9 @@
       </div>
 
       <div class="tab-panel" id="tabPkg" hidden>
-        <div class="suggest-btn-row">
+        <div class="suggest-btn-row" style="display:flex; gap:10px; flex-wrap:wrap;">
           <button type="button" class="btn" id="btnSuggestModules">↺ Sugerir módulos según las respuestas del cliente</button>
+          <button type="button" class="btn primary" id="btnFullscreen">⛶ Pantalla completa</button>
         </div>
 
         <div class="subtabs">
@@ -1345,6 +1354,24 @@
     });
 
     el('btnSuggestModules').addEventListener('click', suggestModules);
+
+    el('btnFullscreen').addEventListener('click', function () {
+      var target = el('tabPkg');
+      var isFs = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!isFs) {
+        var req = target.requestFullscreen || target.webkitRequestFullscreen;
+        if (req) req.call(target);
+      } else {
+        var exit = document.exitFullscreen || document.webkitExitFullscreen;
+        if (exit) exit.call(document);
+      }
+    });
+    ['fullscreenchange', 'webkitfullscreenchange'].forEach(function (evt) {
+      document.addEventListener(evt, function () {
+        var isFs = document.fullscreenElement || document.webkitFullscreenElement;
+        el('btnFullscreen').textContent = isFs ? '✕ Salir de pantalla completa' : '⛶ Pantalla completa';
+      });
+    });
 
     document.querySelectorAll('.tab-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
