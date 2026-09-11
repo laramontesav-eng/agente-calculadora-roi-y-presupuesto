@@ -276,7 +276,7 @@
   .tile .t-value { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
   .tile .t-note { font-size: 11.5px; color: var(--text-2); margin-top: 4px; }
 
-  /* Upside (revenue potential) callout — deliberately NOT hero-styled, kept separate from "ahorro" */
+  /* Secondary stat callout — ahorro de costes, deliberately smaller than the hero (ingresos potenciales) */
   .upside-card {
     margin-top: 16px;
     padding: 16px 18px;
@@ -298,6 +298,24 @@
     color: var(--brand-purple);
     white-space: nowrap;
   }
+
+  .hero-slider { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border); }
+  .hero-slider label { display: block; font-size: 12.5px; color: var(--text-2); margin-bottom: 8px; }
+
+  .combo-total {
+    margin-top: 14px;
+    padding: 13px 18px;
+    border-radius: 12px;
+    background: var(--surface-2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-2);
+  }
+  .combo-total b { font-family: 'JetBrains Mono', monospace; color: var(--text); font-size: 15px; white-space: nowrap; }
 
   /* Tabs */
   .tabs { display: flex; gap: 6px; margin-bottom: 18px; border-bottom: 1px solid var(--border); }
@@ -403,7 +421,7 @@
   table.proj th:first-child, table.proj td:first-child { text-align: left; font-variant-numeric: normal; }
   table.proj th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .3px; text-transform: uppercase; color: var(--muted); font-weight: 600; }
   table.proj td.pos { color: var(--good); font-weight: 600; }
-  table.proj td.neg { color: var(--bad); font-weight: 600; }
+  table.proj td.neg { color: var(--muted); font-weight: 600; }
 
   /* ---------- Budget configurator ---------- */
   .suggest-btn-row { margin-bottom: 14px; }
@@ -514,6 +532,8 @@
 
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
+
+
 </head>
 <body>
 <div class="wrap">
@@ -636,19 +656,6 @@
         </div>
       </div>
 
-      <details class="card">
-        <summary>Ajustar supuestos del modelo</summary>
-        <div class="details-body stack" style="gap:14px;">
-          <p class="hint2">Estimación de Brain&amp;Bots sobre lo que suele conseguirse con NetLead Elite, no un dato del cliente. Ajústalo si tienes información mejor.</p>
-          <div class="field">
-            <label for="pctRecuperacionLeads">% de leads perdidos que se recuperarían con mejor seguimiento</label>
-            <div class="range-row">
-              <input type="range" id="pctRecuperacionLeads" min="0" max="100" step="5" value="60">
-              <output for="pctRecuperacionLeads" id="outPctRecuperacionLeads">60 %</output>
-            </div>
-          </div>
-        </div>
-      </details>
     </form>
 
     <!-- ============ RIGHT: RESULTS ============ -->
@@ -660,18 +667,32 @@
 
       <div class="tab-panel" id="tabCalc">
         <div class="hero-tile">
-          <div class="hero-label">Ahorro de costes mensual estimado</div>
-          <div class="hero-value" id="outAhorroTotal">0 €</div>
-          <div class="hero-sub" id="outPctFacturacion">—</div>
+          <div class="hero-label">Ingresos potenciales adicionales / mes</div>
+          <div class="hero-value" id="outIngresosPotenciales">0 €</div>
+          <div class="hero-sub">Por recuperar leads que hoy se pierden por falta de seguimiento. <span id="outLeadsNota"></span></div>
           <div class="hero-breakdown">
-            <div class="item">Personal: <b id="bdPersonal">0 €</b></div>
-            <div class="item">Herramientas: <b id="bdHerramientas">0 €</b></div>
+            <div class="item">Leads/mes: <b id="bdLeadsMes">0</b></div>
+            <div class="item">Sin buen seguimiento: <b id="bdLeadsPerdidos">0</b></div>
+            <div class="item">Recuperables: <b id="bdLeadsRecuperados">0</b></div>
+            <div class="item">→ Ventas extra: <b id="bdVentasRecuperadas">0</b></div>
+          </div>
+          <div class="hero-slider">
+            <label for="pctRecuperacionLeads">% de leads perdidos que se recuperarían con mejor seguimiento (ajústalo en la llamada)</label>
+            <div class="range-row">
+              <input type="range" id="pctRecuperacionLeads" min="0" max="100" step="5" value="60">
+              <output for="pctRecuperacionLeads" id="outPctRecuperacionLeads">60 %</output>
+            </div>
           </div>
         </div>
 
         <div class="upside-card">
-          <div class="u-label"><strong>Ingresos potenciales adicionales</strong> por recuperar leads que hoy se pierden. No es ahorro de coste, es venta extra — no está sumado en la cifra de arriba. <span id="outLeadsNota"></span></div>
-          <div class="u-value" id="outIngresosPotenciales">0 €/mes</div>
+          <div class="u-label"><strong>Ahorro de costes mensual</strong> en personal y herramientas al automatizar con NetLead. <span id="outPctFacturacion"></span></div>
+          <div class="u-value" id="outAhorroTotal">0 €</div>
+        </div>
+
+        <div class="combo-total">
+          <span>Valor total mensual con NetLead (ingresos potenciales + ahorro de costes) — así se calculan el gráfico y el payback de abajo</span>
+          <b id="outValorTotal">0 €/mes</b>
         </div>
 
         <div class="tiles">
@@ -688,7 +709,7 @@
           <div class="tile">
             <div class="t-label">Payback de la inversión</div>
             <div class="t-value" id="outPayback">—</div>
-            <div class="t-note">meses (sobre ahorro de costes)</div>
+            <div class="t-note">meses (sobre ingresos + ahorro combinados)</div>
           </div>
         </div>
 
@@ -707,20 +728,20 @@
 
         <div class="card chart-card">
           <div class="chart-head">
-            <div class="chart-title">Ahorro de costes acumulado vs. coste — 3 / 6 / 12 meses</div>
+            <div class="chart-title">Valor generado acumulado vs. coste — 3 / 6 / 12 meses</div>
             <div class="legend">
-              <span class="l-item"><span class="swatch" style="background:var(--good);"></span>Ahorro acumulado</span>
+              <span class="l-item"><span class="swatch" style="background:var(--good);"></span>Valor generado acumulado</span>
               <span class="l-item"><span class="swatch" style="background:var(--brand-magenta);"></span>Coste total (setup + mantenimiento)</span>
             </div>
           </div>
-          <svg class="roi-chart" id="roiChart" viewBox="0 0 640 300" role="img" aria-label="Comparativa de ahorro acumulado y coste total a 3, 6 y 12 meses"></svg>
+          <svg class="roi-chart" id="roiChart" viewBox="0 0 640 300" role="img" aria-label="Comparativa de valor generado acumulado y coste total a 3, 6 y 12 meses"></svg>
 
           <div class="table-wrap">
             <table class="proj">
               <thead>
                 <tr>
                   <th>Periodo</th>
-                  <th>Ahorro acumulado</th>
+                  <th>Valor generado acumulado</th>
                   <th>Coste total</th>
                   <th>Beneficio neto</th>
                   <th>ROI</th>
@@ -734,11 +755,11 @@
         <div class="card method">
           <div class="group-title">Cómo se calcula</div>
           <ul>
+            <li>Ingresos potenciales = leads/mes × % sin buen seguimiento × % recuperable (ajustable en la propia calculadora) × tasa de cierre × ticket medio.</li>
             <li>Ahorro en personal = gasto mensual en personal/freelancers × % que se podría automatizar (ya incluye las automatizaciones que trae NetLead de serie).</li>
             <li>Ahorro en herramientas = suma de las herramientas marcadas como actuales, más las que añadas manualmente (NetLead las sustituye por completo), o el ajuste manual si lo indicas.</li>
-            <li>El ahorro de costes (personal + herramientas) es lo único que cuenta para el payback y el ROI — es el número defendible.</li>
-            <li>Ingresos potenciales = leads/mes × % sin buen seguimiento × % recuperable × tasa de cierre × ticket medio. Se muestra aparte porque es venta adicional, no ahorro, y depende de más factores (oferta, cierre, mercado).</li>
-            <li>ROI = (ahorro acumulado − coste total) ÷ coste total, siendo coste total = implementación + mantenimiento acumulado.</li>
+            <li>Valor total mensual = ingresos potenciales + ahorro de costes (personal + herramientas). Es la cifra que alimenta el gráfico, la tabla y el payback de abajo.</li>
+            <li>ROI = (valor generado acumulado − coste total) ÷ coste total, siendo coste total = implementación + mantenimiento acumulado.</li>
           </ul>
           <p class="disclaimer">Estimaciones orientativas a partir de los datos introducidos y de precios de mercado de referencia. El resultado real depende del punto de partida del negocio y de la implementación.</p>
         </div>
@@ -1094,15 +1115,17 @@
 
     var leadsPerdidosMes = s.leadsMes * (s.pctLeadsPerdidos / 100);
     var leadsRecuperadosMes = leadsPerdidosMes * (s.pctRecuperacionLeads / 100);
-    var valorLeadsRecuperadosMes = leadsRecuperadosMes * (s.tasaCierre / 100) * s.ticketMedio;
+    var ventasRecuperadasMes = leadsRecuperadosMes * (s.tasaCierre / 100);
+    var valorLeadsRecuperadosMes = ventasRecuperadasMes * s.ticketMedio;
 
     var customTotal = (s.customTools || []).reduce(function (a, t) { return a + t.price; }, 0);
     var checklistTotal = toolsSum(s.tools) + customTotal;
     var ahorroHerramientasMes = s.gastoHerramientasOverride > 0 ? s.gastoHerramientasOverride : checklistTotal;
 
-    // Only real cost reduction counts as "ahorro" — revenue upside (leads recuperados) is kept separate
-    // and never folded into this figure, the %-de-facturación, the chart, the table or the payback.
     var ahorroTotalMensual = ahorroPersonalMes + ahorroHerramientasMes;
+    // Valor total = ingresos potenciales (venta extra) + ahorro de costes, combinados a petición del cliente:
+    // es la cifra que alimenta el gráfico, la tabla y el payback (ambos componentes se muestran también por separado).
+    var valorTotalMensual = valorLeadsRecuperadosMes + ahorroTotalMensual;
     var pctFacturacion = s.facturacion > 0 ? (ahorroTotalMensual / s.facturacion) * 100 : null;
     var costePorLead = s.leadsMes > 0 ? s.gastoPublicidad / s.leadsMes : null;
 
@@ -1110,18 +1133,20 @@
       ahorroPersonalMes: ahorroPersonalMes,
       leadsPerdidosMes: leadsPerdidosMes,
       leadsRecuperadosMes: leadsRecuperadosMes,
+      ventasRecuperadasMes: ventasRecuperadasMes,
       valorLeadsRecuperadosMes: valorLeadsRecuperadosMes,
       checklistTotal: checklistTotal,
       ahorroHerramientasMes: ahorroHerramientasMes,
       ahorroTotalMensual: ahorroTotalMensual,
+      valorTotalMensual: valorTotalMensual,
       pctFacturacion: pctFacturacion,
       costePorLead: costePorLead
     };
   }
 
-  function computeProjection(ahorroTotalMensual, inversionInicial) {
+  function computeProjection(valorTotalMensual, inversionInicial) {
     return PERIODS.map(function (n) {
-      var ahorroAcumulado = ahorroTotalMensual * n;
+      var ahorroAcumulado = valorTotalMensual * n;
       var costeTotal = inversionInicial + MAINTENANCE * n;
       var beneficioNeto = ahorroAcumulado - costeTotal;
       var roiPct = costeTotal > 0 ? (beneficioNeto / costeTotal) * 100 : null;
@@ -1129,8 +1154,8 @@
     });
   }
 
-  function computePayback(ahorroTotalMensual, inversionInicial) {
-    var netMonthly = ahorroTotalMensual - MAINTENANCE;
+  function computePayback(valorTotalMensual, inversionInicial) {
+    var netMonthly = valorTotalMensual - MAINTENANCE;
     if (netMonthly <= 0) return null;
     return inversionInicial / netMonthly;
   }
@@ -1168,7 +1193,7 @@
       parts.push('<rect x="' + cx + '" y="' + yCoste + '" width="' + barW + '" height="' + Math.max(hCoste, 1) + '" rx="4" fill="var(--brand-magenta)"/>');
       parts.push('<text x="' + (cx + barW / 2) + '" y="' + (yCoste - 8) + '" text-anchor="middle" font-size="11" fill="var(--text)" font-weight="600">' + fmtEURCompact(p.costeTotal) + '</text>');
 
-      var netColor = p.beneficioNeto >= 0 ? 'var(--good)' : 'var(--bad)';
+      var netColor = p.beneficioNeto >= 0 ? 'var(--good)' : 'var(--muted)';
       var netSign = p.beneficioNeto >= 0 ? '+' : '−';
       parts.push('<text x="' + (groupX + groupW / 2) + '" y="' + (margin.top - 8) + '" text-anchor="middle" font-size="11.5" font-weight="700" fill="' + netColor + '">' + netSign + fmtEURCompact(Math.abs(p.beneficioNeto)) + ' neto</text>');
 
@@ -1220,32 +1245,35 @@
     var s = readState();
     var metrics = computeMetrics(s);
 
+    el('outIngresosPotenciales').textContent = fmtEUR(metrics.valorLeadsRecuperadosMes) + '/mes';
+    el('outLeadsNota').textContent = '(~' + numFmt.format(metrics.leadsRecuperadosMes) + ' leads/mes recuperados)';
+    el('bdLeadsMes').textContent = numFmt.format(s.leadsMes);
+    el('bdLeadsPerdidos').textContent = numFmt.format(metrics.leadsPerdidosMes);
+    el('bdLeadsRecuperados').textContent = numFmt.format(metrics.leadsRecuperadosMes);
+    el('bdVentasRecuperadas').textContent = numFmt.format(metrics.ventasRecuperadasMes);
+
     el('outAhorroTotal').textContent = fmtEUR(metrics.ahorroTotalMensual);
     el('outPctFacturacion').textContent = metrics.pctFacturacion === null
       ? 'Introduce la facturación para ver el % de impacto.'
       : 'Equivale al ' + numFmt.format(metrics.pctFacturacion) + ' % de su facturación mensual actual.';
 
-    el('bdPersonal').textContent = fmtEUR(metrics.ahorroPersonalMes);
-    el('bdHerramientas').textContent = fmtEUR(metrics.ahorroHerramientasMes);
+    el('outValorTotal').textContent = fmtEUR(metrics.valorTotalMensual) + '/mes';
 
     el('outAhorroPersonal').textContent = fmtEUR(metrics.ahorroPersonalMes);
     el('outAhorroHerramientas').textContent = fmtEUR(metrics.ahorroHerramientasMes);
     el('outCostePorLead').textContent = metrics.costePorLead === null ? 'al mes' : 'al mes · ' + eurFmt1.format(metrics.costePorLead) + '/lead en ads';
 
-    el('outIngresosPotenciales').textContent = fmtEUR(metrics.valorLeadsRecuperadosMes) + '/mes';
-    el('outLeadsNota').textContent = '(~' + numFmt.format(metrics.leadsRecuperadosMes) + ' leads/mes recuperados)';
-
     renderToolCompare(s.tools, s.customTools, s.gastoHerramientasOverride);
 
-    var projection = computeProjection(metrics.ahorroTotalMensual, SETUP_TOTAL);
+    var projection = computeProjection(metrics.valorTotalMensual, SETUP_TOTAL);
     renderChart(projection);
     renderTable(projection);
 
-    var payback = computePayback(metrics.ahorroTotalMensual, SETUP_TOTAL);
+    var payback = computePayback(metrics.valorTotalMensual, SETUP_TOTAL);
     el('outPayback').textContent = payback === null ? '—' : numFmt.format(payback);
     el('cfgPaybackLine').innerHTML = payback === null
-      ? 'Con el ahorro de costes actual (pestaña Calculadora), el ahorro mensual no cubre el mantenimiento (' + fmtEUR(MAINTENANCE) + '/mes). Revisa los datos del cliente o el presupuesto.'
-      : 'Con el ahorro de costes de la pestaña Calculadora, recuperas esta inversión de ' + fmtEUR(SETUP_TOTAL) + ' en <b>' + numFmt.format(payback) + ' meses</b> (mantenimiento: ' + fmtEUR(MAINTENANCE) + '/mes).';
+      ? 'Con el valor mensual actual (ingresos + ahorro, pestaña Calculadora), no cubre el mantenimiento (' + fmtEUR(MAINTENANCE) + '/mes). Revisa los datos del cliente o el presupuesto.'
+      : 'Con el ingreso potencial y el ahorro de la pestaña Calculadora, recuperas esta inversión de ' + fmtEUR(SETUP_TOTAL) + ' en <b>' + numFmt.format(payback) + ' meses</b> (mantenimiento: ' + fmtEUR(MAINTENANCE) + '/mes).';
 
     saveState(s);
   }
@@ -1418,5 +1446,6 @@
   document.addEventListener('DOMContentLoaded', init);
 })();
 </script>
+
 </body>
 </html>
