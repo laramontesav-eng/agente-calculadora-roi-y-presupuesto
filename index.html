@@ -300,7 +300,8 @@
   }
 
   .hero-slider { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border); }
-  .hero-slider label { display: block; font-size: 12.5px; color: var(--text-2); margin-bottom: 8px; }
+  .hero-slider summary { padding: 0; cursor: pointer; }
+  .hero-slider[open] summary { margin-bottom: 10px; }
 
   .combo-total {
     margin-top: 14px;
@@ -676,13 +677,13 @@
             <div class="item">Recuperables: <b id="bdLeadsRecuperados">0</b></div>
             <div class="item">→ Ventas extra: <b id="bdVentasRecuperadas">0</b></div>
           </div>
-          <div class="hero-slider">
-            <label for="pctRecuperacionLeads">% de leads perdidos que se recuperarían con mejor seguimiento (ajústalo en la llamada)</label>
+          <details class="hero-slider">
+            <summary>% de leads perdidos que se recuperarían con mejor seguimiento (uso interno)</summary>
             <div class="range-row">
-              <input type="range" id="pctRecuperacionLeads" min="0" max="100" step="5" value="60">
-              <output for="pctRecuperacionLeads" id="outPctRecuperacionLeads">60 %</output>
+              <input type="range" id="pctRecuperacionLeads" min="0" max="100" step="5" value="50">
+              <output for="pctRecuperacionLeads" id="outPctRecuperacionLeads">50 %</output>
             </div>
-          </div>
+          </details>
         </div>
 
         <div class="upside-card">
@@ -1325,7 +1326,7 @@
     pctLeadsPerdidos: 30, nivelAutomatizacion: 40,
     gastoHerramientasOverride: 0, gastoPublicidad: 1800,
     cursos: true, lanzamientos: true, agenteIA: false,
-    pctRecuperacionLeads: 60,
+    pctRecuperacionLeads: 50,
     tools: ['crm', 'funnels', 'email', 'whatsapp', 'forms', 'citas', 'automatizacion', 'redes', 'chat'],
     customTools: [{ id: 'custom-demo', name: 'Software de facturación (no listado)', price: 25 }]
   };
@@ -1425,7 +1426,7 @@
       renderConfig();
     });
     el('btnReset').addEventListener('click', function () {
-      var empty = { facturacion: 0, equipo: 0, gastoMensualPersonal: 0, leadsMes: 0, ticketMedio: 0, gastoHerramientasOverride: 0, gastoPublicidad: 0, tasaCierre: 0, pctRecuperacionLeads: 60, pctLeadsPerdidos: 30, nivelAutomatizacion: 40, cursos: false, lanzamientos: false, agenteIA: false, tools: [], customTools: [] };
+      var empty = { facturacion: 0, equipo: 0, gastoMensualPersonal: 0, leadsMes: 0, ticketMedio: 0, gastoHerramientasOverride: 0, gastoPublicidad: 0, tasaCierre: 0, pctRecuperacionLeads: 50, pctLeadsPerdidos: 30, nivelAutomatizacion: 40, cursos: false, lanzamientos: false, agenteIA: false, tools: [], customTools: [] };
       applyState(empty);
       cfgState = { modules: {}, ia2: false, tierOverride: null };
       try { localStorage.removeItem(STORE_KEY); } catch (e) {}
