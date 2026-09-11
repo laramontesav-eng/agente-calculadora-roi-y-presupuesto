@@ -680,8 +680,8 @@
           <details class="hero-slider">
             <summary>% de leads perdidos que se recuperarían con mejor seguimiento (uso interno)</summary>
             <div class="range-row">
-              <input type="range" id="pctRecuperacionLeads" min="0" max="100" step="5" value="50">
-              <output for="pctRecuperacionLeads" id="outPctRecuperacionLeads">50 %</output>
+              <input type="range" id="pctRecuperacionLeads" min="0" max="100" step="5" value="30">
+              <output for="pctRecuperacionLeads" id="outPctRecuperacionLeads">30 %</output>
             </div>
           </details>
         </div>
@@ -735,6 +735,7 @@
               <span class="l-item"><span class="swatch" style="background:var(--brand-magenta);"></span>Coste total (setup + mantenimiento)</span>
             </div>
           </div>
+          <p class="hint" style="margin-bottom:10px;">Calendario real de pago: 50% del setup al inicio + 50% a los 30 días; la mensualidad empieza a cobrarse 15 días después del 2º pago (~día 45) — ya reflejado en el coste total, el beneficio neto y el ROI de abajo.</p>
           <svg class="roi-chart" id="roiChart" viewBox="0 0 640 300" role="img" aria-label="Comparativa de valor generado acumulado y coste total a 3, 6 y 12 meses"></svg>
 
           <div class="table-wrap">
@@ -760,7 +761,7 @@
             <li>Ahorro en personal = gasto mensual en personal/freelancers × % que se podría automatizar (ya incluye las automatizaciones que trae NetLead de serie).</li>
             <li>Ahorro en herramientas = suma de las herramientas marcadas como actuales, más las que añadas manualmente (NetLead las sustituye por completo), o el ajuste manual si lo indicas.</li>
             <li>Valor total mensual = ingresos potenciales + ahorro de costes (personal + herramientas). Es la cifra que alimenta el gráfico, la tabla y el payback de abajo.</li>
-            <li>ROI = (valor generado acumulado − coste total) ÷ coste total, siendo coste total = implementación + mantenimiento acumulado.</li>
+            <li>ROI = (valor generado acumulado − coste total) ÷ coste total, siendo coste total = implementación (50% al inicio + 50% a 30 días) + mantenimiento, que empieza a cobrarse a partir de ~día 45.</li>
           </ul>
           <p class="disclaimer">Estimaciones orientativas a partir de los datos introducidos y de precios de mercado de referencia. El resultado real depende del punto de partida del negocio y de la implementación.</p>
         </div>
@@ -773,11 +774,11 @@
         </div>
 
         <div class="subtabs">
-          <button type="button" class="subtab-btn active" data-subtab="internal">Vista interna</button>
-          <button type="button" class="subtab-btn" data-subtab="client">Vista cliente</button>
+          <button type="button" class="subtab-btn" data-subtab="internal">Vista interna</button>
+          <button type="button" class="subtab-btn active" data-subtab="client">Vista cliente</button>
         </div>
 
-        <div class="subtab-panel" id="subInternal">
+        <div class="subtab-panel" id="subInternal" hidden>
           <div class="cfg-layout">
             <div>
               <div class="card base-card">
@@ -785,7 +786,7 @@
                   <div class="group-title" style="margin:0;border:0;padding:0;">Plan Base (siempre incluido)</div>
                   <span class="card-price">1.500 €</span>
                 </div>
-                <p class="hint" style="margin-top:10px;"><b>CRM + Pipeline</b> · <b>Formularios</b> · <b>Calendario de citas</b> · <b>Dashboard básico</b><br>+ 6 automatizaciones básicas: bienvenida automática, recordatorios de cita, respuesta a llamada perdida, movimiento automático en pipeline, etiquetado automático, reactivación simple.</p>
+                <p class="hint" style="margin-top:10px;"><b>CRM + Pipeline</b> · <b>Formularios</b> · <b>Calendario de citas</b> · <b>Dashboard básico</b> · <b>Funnel</b> (máx. 4 pasos)<br>+ 6 automatizaciones básicas: bienvenida automática, recordatorios de cita, respuesta a llamada perdida, movimiento automático en pipeline, etiquetado automático, reactivación simple.</p>
               </div>
               <div class="card" style="margin-top:16px;">
                 <div class="group-title">Módulos adicionales</div>
@@ -816,12 +817,12 @@
           </div>
         </div>
 
-        <div class="subtab-panel" id="subClient" hidden>
+        <div class="subtab-panel" id="subClient">
           <div class="cfg-layout">
             <div>
               <div class="card base-card">
                 <div class="group-title">Incluido siempre</div>
-                <p class="hint" style="margin-top:10px;"><b>CRM + Pipeline</b> · <b>Formularios</b> · <b>Calendario de citas</b> · <b>Dashboard básico</b><br>+ automatizaciones básicas para que dejes de perseguir leads y citas a mano.</p>
+                <p class="hint" style="margin-top:10px;"><b>CRM + Pipeline</b> · <b>Formularios</b> · <b>Calendario de citas</b> · <b>Dashboard básico</b> · <b>Funnel</b><br>+ automatizaciones básicas para que dejes de perseguir leads y citas a mano.</p>
               </div>
               <div class="card" style="margin-top:16px;">
                 <div class="group-title">¿Qué te gustaría añadir?</div>
@@ -882,7 +883,6 @@
   ];
 
   var MODULES = [
-    { id: 'funnel', name: 'Funnel', scope: 'Máx. 4 pasos (ej: registro → visionado y agenda → prellamada → el que necesite el cliente)', price: 250 },
     { id: 'web', name: 'Web', scope: 'Máx. 4 páginas: inicio, servicios/precios, quiénes somos, contacto', price: 300 },
     { id: 'email', name: 'Email marketing', scope: 'Secuencias + newsletters', price: 200 },
     { id: 'whatsapp', name: 'WhatsApp marketing', scope: 'Automatización por WhatsApp', price: 150, flag: 'WhatsApp lleva 12€/mes aparte de plataforma (se contrata dentro de la herramienta) + los mensajes los paga el cliente según su volumen.' },
@@ -903,6 +903,10 @@
     { id: 'elite', name: 'Mantenimiento Elite', price: 297 }
   ];
   var BASE_SETUP = 1500;
+  // Calendario real de pago: 50% del setup al inicio (día 0) + 50% a los 30 días; la mensualidad
+  // empieza a cobrarse MAINTENANCE_DELAY_DAYS después de ese 2º pago (día 30 + 15 = ~día 45).
+  var MAINTENANCE_DELAY_DAYS = 15;
+  var MAINTENANCE_DELAY_MONTHS = 1 + MAINTENANCE_DELAY_DAYS / 30;
   var cfgState = { modules: {}, ia2: false, tierOverride: null };
   var SETUP_TOTAL = BASE_SETUP;
   var MAINTENANCE = TIERS[0].price;
@@ -1145,10 +1149,17 @@
     };
   }
 
+  // Nº de mensualidades ya cobradas a los n meses, dado que la 1ª se cobra en MAINTENANCE_DELAY_MONTHS
+  // y luego una cada mes (billedMaintenanceMonths(3) = 2, (6) = 5, (12) = 11 con la espera de 15 días).
+  function billedMaintenanceMonths(n) {
+    if (n < MAINTENANCE_DELAY_MONTHS) return 0;
+    return Math.floor(n - MAINTENANCE_DELAY_MONTHS) + 1;
+  }
+
   function computeProjection(valorTotalMensual, inversionInicial) {
     return PERIODS.map(function (n) {
       var ahorroAcumulado = valorTotalMensual * n;
-      var costeTotal = inversionInicial + MAINTENANCE * n;
+      var costeTotal = inversionInicial + MAINTENANCE * billedMaintenanceMonths(n);
       var beneficioNeto = ahorroAcumulado - costeTotal;
       var roiPct = costeTotal > 0 ? (beneficioNeto / costeTotal) * 100 : null;
       return { n: n, ahorroAcumulado: ahorroAcumulado, costeTotal: costeTotal, beneficioNeto: beneficioNeto, roiPct: roiPct };
@@ -1156,9 +1167,13 @@
   }
 
   function computePayback(valorTotalMensual, inversionInicial) {
+    if (valorTotalMensual <= 0) return null;
+    // Mientras no se cobra mantenimiento (0 a MAINTENANCE_DELAY_MONTHS), el coste se queda fijo en la implementación.
+    var tSinMantenimiento = inversionInicial / valorTotalMensual;
+    if (tSinMantenimiento <= MAINTENANCE_DELAY_MONTHS) return tSinMantenimiento;
     var netMonthly = valorTotalMensual - MAINTENANCE;
     if (netMonthly <= 0) return null;
-    return inversionInicial / netMonthly;
+    return (inversionInicial - MAINTENANCE * MAINTENANCE_DELAY_MONTHS) / netMonthly;
   }
 
   function renderChart(periods) {
@@ -1326,7 +1341,7 @@
     pctLeadsPerdidos: 30, nivelAutomatizacion: 40,
     gastoHerramientasOverride: 0, gastoPublicidad: 1800,
     cursos: true, lanzamientos: true, agenteIA: false,
-    pctRecuperacionLeads: 50,
+    pctRecuperacionLeads: 30,
     tools: ['crm', 'funnels', 'email', 'whatsapp', 'forms', 'citas', 'automatizacion', 'redes', 'chat'],
     customTools: [{ id: 'custom-demo', name: 'Software de facturación (no listado)', price: 25 }]
   };
@@ -1426,7 +1441,7 @@
       renderConfig();
     });
     el('btnReset').addEventListener('click', function () {
-      var empty = { facturacion: 0, equipo: 0, gastoMensualPersonal: 0, leadsMes: 0, ticketMedio: 0, gastoHerramientasOverride: 0, gastoPublicidad: 0, tasaCierre: 0, pctRecuperacionLeads: 50, pctLeadsPerdidos: 30, nivelAutomatizacion: 40, cursos: false, lanzamientos: false, agenteIA: false, tools: [], customTools: [] };
+      var empty = { facturacion: 0, equipo: 0, gastoMensualPersonal: 0, leadsMes: 0, ticketMedio: 0, gastoHerramientasOverride: 0, gastoPublicidad: 0, tasaCierre: 0, pctRecuperacionLeads: 30, pctLeadsPerdidos: 30, nivelAutomatizacion: 40, cursos: false, lanzamientos: false, agenteIA: false, tools: [], customTools: [] };
       applyState(empty);
       cfgState = { modules: {}, ia2: false, tierOverride: null };
       try { localStorage.removeItem(STORE_KEY); } catch (e) {}
